@@ -1,0 +1,69 @@
+<html>
+<head>
+<title> Demonstrates drawing lines from arrays and array of objects in d3js </title>
+<script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<svg id="svg" width=300 height=300></svg>
+
+<script>
+
+// data 
+var rank_data = [
+	{day: 25,  rank: 175},
+	{day: 50,  rank: 152.5},
+	{day: 75,  rank: 85},
+	{day: 100, rank: 115},
+	{day: 125, rank: 47.5},
+	{day: 150, rank: 62.5},
+	{day: 175, rank: 25}];
+
+var line_data = [
+  [25,  175],
+  [50,  152.5],
+  [75,  85],
+  [100, 115],
+  [125, 47.5],
+  [150, 62.5],
+  [175, 25]
+];
+
+// using line with default array data
+var line1 = d3.line()
+
+// using line with accessors
+var line2 = d3.line()
+	.x((d) => d.day)
+	.y((d) => d.rank);
+
+let svg = d3.select('svg');
+let width = svg.attr('width');
+let height = svg.attr('height');
+let plot = svg.append('g');
+	plot.append('rect')
+		.attr('x', 0)
+		.attr('y', 0)
+		.attr('width', 295)
+		.attr('height', 295)
+		.attr('fill', 'rgb(230, 230, 230)')
+		.attr('stroke', 'red');
+
+
+// draw using array of objects data - using accessors
+	plot.append('path')
+		.attr('d', line2(rank_data))
+		.attr('fill', 'none')
+		.attr('stroke', 'red')
+
+// draw using array of values
+
+	plot.append('g')
+		.attr('transform', 'translate(0, 50)')
+		.append('path')
+		.attr('d', line1(line_data))
+		.attr('fill', 'none')
+		.attr('stroke', 'red')
+t
+</script>
+</body>
+</html>

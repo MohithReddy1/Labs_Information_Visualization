@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!--  Scaffold for Lab 1 -->
+<html lang="en-US">
+<head>
+    <meta charset="utf-8"/>
+    <title>This page demonstrates using javascript to create html elements</title>
+<head>
+
+<body id = 'body'>
+
+<script>
+
+    var body = document.getElementById("body")
+    var mainheading1 = document.createElement("h1")
+    mainheading1.innerHTML= "Demonstrating Headings"
+    body.appendChild(mainheading1)
+
+    var h2 = document.createElement("h2")
+    h2.innerHTML= "ITCS 5121: Information Visualization (Fall '23)"
+    body.appendChild(h2)
+
+    var h3 = document.createElement("h3")
+    h3.innerHTML= "Lab 1: Demonstrating Elements of HTML Language"
+    body.appendChild(h3)
+
+    var h4 = document.createElement("h4")
+    h4.innerHTML= "Kalpathi Subramanian, Aug 21, 2023"
+    body.appendChild(h4)
+
+    var mainheading2 = document.createElement("h1")
+    mainheading2.innerHTML= "Demonstrating Paragraphs"
+    body.appendChild(mainheading2)
+
+    var para1 = document.createElement("p")
+    para1.innerHTML ="Here is a paragraph; it uses the tag; paragraphs will start a new line and ignore spaces, linebreaks and number of lines depends on the window size"
+    body.appendChild(para1)
+
+    var mainheading3 = document.createElement("h1")
+    mainheading3.innerHTML= "Demonstrating Attributes"
+    body.appendChild(mainheading3)
+
+    var para2 = document.createElement("p")
+    para2.innerHTML ="The 'src' attribute can point to a hyper link such as"
+    body.appendChild(para2)
+
+    var link = document.createElement("a")
+    link.setAttribute('href', '#')
+    link.innerHTML = "Wikipedia - Info Vis"
+    body.appendChild(link)
+
+    var para3 = document.createElement("p")
+    para3.innerHTML ="or to an image using the 'src' attribute as follows:"
+    body.appendChild(para3)
+
+    var img = document.createElement("img")
+    img.src = 'Mickey_Mouse.png'
+    img.width = "200"
+    img.height = "200"
+    body.appendChild(img)
+
+    var mainheading4 = document.createElement("h1")
+    mainheading4.innerHTML= "Demonstrating colored text with a tooltip"
+    body.appendChild(mainheading4)
+
+    var para4 = document.createElement("p")
+    para4.innerHTML ='This is a green line with a tooltip set using the "title" attribute and colored using the "color" attribute'
+    para4.style.color = "#42a042" 
+    body.appendChild(para4)
+
+    var mainheading5 = document.createElement("h1")
+    mainheading5.innerHTML= "Demonstrating Colors, Fonts"
+    body.appendChild(mainheading5)
+
+    var para5 = document.createElement("p")
+    para5.innerHTML ='You can set the text or background color using the "background-color" and "color" attribute'
+    body.appendChild(para5)
+
+    var para6 = document.createElement("p")
+    para6.innerHTML ='An example line illustrating background and text colors'
+    para6.style.backgroundColor = 'red'
+    body.appendChild(para6)
+
+    var mainheading6 = document.createElement("h1")
+    mainheading6.innerHTML= "Demonstrating Lists"
+    body.appendChild(mainheading6)
+
+    var para7 = document.createElement("p")
+    para7.innerHTML ='An example of an ordered list:'
+    body.appendChild(para7)
+
+    var ol = document.createElement("ol")
+    var list1 = document.createElement("li")
+    var list2 = document.createElement("li")
+    list1.innerHTML="Item 1"
+    list2.innerHTML="Item 2"
+
+    ol.appendChild(list1)
+    ol.appendChild(list2)
+    ol.style.color = '#42a042'
+    body.appendChild(ol)
+
+    var para8 = document.createElement("p")
+    para8.innerHTML ='An example of an unordered list with bold font at 24px size:'
+    para8.style.color = "#ff8eff" 
+    body.appendChild(para8)
+
+    var ul = document.createElement("ul")
+    var list3 = document.createElement("li")
+    var list4 = document.createElement("li")
+    list3.innerHTML="Item 1"
+    list4.innerHTML="Item 2"
+    list4.style.fontSize = '24px'
+    list4.style.fontWeight = 'bold'
+    ul.appendChild(list3)
+    ul.appendChild(list4)
+    ul.style.color = 'red'
+    body.appendChild(ul)
+    
+</script>
+
+</body>
+
+</html>

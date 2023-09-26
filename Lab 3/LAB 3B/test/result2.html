@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 3B: Draw Stars Using D3JS</title>
+    <script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+    <svg id="svg" width=800 height=600></svg>
+
+    <script>
+        let coordinates = [];
+
+        let svg = d3.select('svg');
+        let width = svg.attr('width');
+        let height = svg.attr('height');
+
+        let plot = svg.append('g');
+            plot.append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', width)
+                .attr('height', height)
+                .attr('fill', 'rgb(255, 255, 255)')
+                .attr('stroke', 'green')
+                .on('click', mouseClick);
+
+            function mouseClick(evt) {
+                let xCoordinate = evt.x;
+                let yCoordinate = evt.y;
+                const randomColor = getRandomColor();
+                coordinates.push({ x: xCoordinate, y: yCoordinate, color: randomColor });
+                console.log(coordinates);
+                drawStarPattern();
+            }
+
+            function getRandomColor() {
+                const values = "0123456789ABCDEF";
+                let randomColor = "#";
+                for (let i = 0; i < 6; i++) {
+                    randomColor += values[Math.floor(Math.random() * 16)];
+                }
+                return randomColor;
+            }
+
+            function drawStarPattern() {
+
+                const horizontalLineLength = 30;
+                const verticalLineLength = 30;
+                const diagonalLineLength = 18;
+
+                coordinates.forEach(coord => {
+                    drawStar(coord.x, coord.y,horizontalLineLength, verticalLineLength, diagonalLineLength, coord.color);
+                })
+            }
+
+            function drawStar(x, y, horizLen, vertLen, diagLen, color) {
+
+                const lines = [
+                    { x1: -horizLen / 2, y1: 0, x2: horizLen / 2, y2: 0 },
+                    { x1: 0, y1: -vertLen / 2, x2: 0, y2: vertLen / 2 },
+                    { x1: -diagLen / 2, y1: -diagLen / 2, x2: diagLen / 2, y2: diagLen / 2 },
+                    { x1: -diagLen / 2, y1: diagLen / 2, x2: diagLen / 2, y2: -diagLen / 2 }
+                ];
+                
+                const star = svg.append("g")
+                    .attr("transform", `translate(${x},${y})`);                
+
+                const line = star.selectAll("line")
+                    .data(lines)
+                    .enter()
+                    .append("line")
+                    .attr("x1", d => d.x1)
+                    .attr("y1", d => d.y1)
+                    .attr("x2", d => d.x2)
+                    .attr("y2", d => d.y2)
+                    .attr("stroke", color || getRandomColor())
+                    .style('stroke-width', 3);
+
+            }
+
+
+    </script>
+    
+</body>
+</html>

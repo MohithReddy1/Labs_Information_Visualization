@@ -1,0 +1,189 @@
+<!-- Note: Open with live server -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        #info{
+            position: absolute;
+            background-color: white;
+            padding: 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <p width="1050" height="550"></p>
+
+    <div>
+        <textarea style="margin-left: 30px;" id="salesValue" rows="4" cols="35" readonly></textarea>
+    </div>
+
+    <div id="info"></div>
+
+    <script>
+
+        d3.csv("./sales_data_sample.csv").then(function(data) {
+                       
+            const salesDataSample = new Map();
+            data.forEach(function(d) {
+                const key = d.MONTH_ID + '/' + d.YEAR_ID;
+                if (!salesDataSample.has(key)) {
+                    salesDataSample.set(key, 0);
+                }
+                salesDataSample.set(key, salesDataSample.get(key) + parseFloat(d.SALES))
+            });
+            
+            // sorting salesData
+            // const sortedSalesData = new Map([...salesDataSample.entries()].sort());
+            const sortedSalesData = new Map([...salesDataSample.entries()].sort((i, j) => {
+
+                // Sorting function for "month/year" format
+                const [iMonth, iYear] = i[0].split('/').map(Number);
+                const [jMonth, jyear] = j[0].split('/').map(Number);
+
+                if (iYear == jyear) {
+                    return iMonth - jMonth;
+                } else {
+                    return iYear - jyear;
+                }
+            }));
+
+            // To add some more data to sortedSalesData use .set(key, value)
+            // sortedSalesData.set("6/2005", 0);
+            // sortedSalesData.set("7/2005", 0);
+            // sortedSalesData.set("8/2005", 0);
+
+            // console.log('Data: ', salesData);
+            // console.log('Sorted Data:', sortedSalesData);
+            
+            const svgWidth = 1050;
+            const svgHeight = 550;
+            
+            const svg = d3.select("p")
+                .append('svg')
+                .attr("width", svgWidth)
+                .attr("height", svgHeight);
+
+            const plotWidth = 700;
+            const plotHeight = 400;
+
+            // rectangle
+            let plot = svg.append('g');
+            plot.append('rect')
+                .attr('x', 30)
+                .attr('y', 40)
+                .attr('width', plotWidth+100)
+                .attr('height', plotHeight+100)
+                .attr('fill', 'rgb(255, 255, 255)')
+                .attr('stroke', 'green');
+
+            // Scaling and axis
+            const xScale = d3.scaleLinear()
+                .domain([0, sortedSalesData.size - 1])
+                .range([110, 100 + plotWidth]); 
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max([...sortedSalesData.values()])])
+                .range([70 + plotHeight, 50]);
+
+            const xAxis = d3.axisBottom(xScale)
+                .tickFormat((d, i) => {
+                    const keys = [...sortedSalesData.keys()];
+                    return keys[i * 2];
+                });
+
+            const yAxis = d3.axisLeft(yScale)
+                .tickFormat(d3.format(".2s")); //sales value formated to 100k, 200k etc.
+
+            plot.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", "translate(0," + (70 + plotHeight) + ")")
+                .call(xAxis);
+
+            plot.append("g")
+                .attr("class", "y-axis")
+                .attr("transform", "translate(110,0)")
+                .call(yAxis);
+
+            // Adding X and Y axis titles
+            plot.append("text")
+                .attr("x", plotWidth / 1.6)
+                .attr("y", plotHeight + 120)
+                .style("text-anchor", "middle")
+                .text("Month/Year");
+
+            plot.append("text")
+                .attr("x", -plotHeight / 1.5)
+                .attr("y", 60)
+                .style("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .text("Total Sales");
+
+            // Adding Plot title
+            plot.append("text")
+                .attr("x", plotWidth / 1.6)
+                .attr("y", 30)
+                .style("text-anchor", "middle")
+                .style("font-weight", "bold")
+                .style("font-size", "20px")
+                .text("Sales Revenues");
+
+            // plotting sortedSalesData (data available till 5/2005 sales)
+            const pathData = [...sortedSalesData];
+            const path = d3.line()
+                .x(function(d, k) { return xScale(k); })
+                .y(function(d) { return yScale(d[1]); });
+
+            // path
+            plot.append("path")
+                .attr("d", path(pathData))
+                .attr("fill", "none")
+                .attr("stroke", "blue");
+
+            // Mouse clicking or mouseover Interactions for sales plot 
+            const hoverInfo = d3.select("#info");
+
+            plot.selectAll("circle")
+                .data(pathData)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d, k) { return xScale(k); })
+                .attr("cy", function(d) { return yScale(d[1]); })
+                .attr("r", 5)
+                .attr("fill", "red")
+                .on("click", function(e, d) {
+                    const salesValue = d[1]  //original sales value
+                    // const salesValue = d[1].toFixed(2); //round off to two decimals 
+                    document.getElementById("salesValue").value = '\r\n'  + `Sales Month/Year: ${d[0]}` + '\r\n'  + `Sales Revenue: $${salesValue}`;
+                })
+                .on("mouseover", function(e, d) {
+                    hoverInfo.transition()
+                        .duration(150)
+                        .style("opacity", 0.9);
+                    hoverInfo.html(`Sales: $${d[1].toFixed(2)}`) //rounded off to two decimals 
+                        .style("left", (e.x + 10) + "px")
+                        .style("top", (e.y - 25) + "px")
+                        .style("font-weight", "500")
+                        .style("font-size", "18px");
+                })
+                .on("mouseout", function() {
+                    hoverInfo.transition()
+                        .duration(600)
+                        .style("opacity", 0);
+                });
+
+        }).catch(function(error) {
+            console.error("Error:", error);
+        });
+        
+    </script>
+</body>
+</html>

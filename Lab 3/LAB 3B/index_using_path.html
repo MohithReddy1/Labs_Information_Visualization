@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 3B: Draw Stars Using D3JS Path</title>
+    <script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+    <svg id="svg" width=800 height=600></svg>
+
+    <script>
+        let clickEventCoordinates = [];
+
+        let svg = d3.select('svg');
+        let width = svg.attr('width');
+        let height = svg.attr('height');
+
+        let plot = svg.append('g');
+            plot.append('rect')
+                .attr('x', 50)
+                .attr('y', 50)
+                .attr('width', width-100)
+                .attr('height', height-100)
+                .attr('fill', 'rgb(255, 255, 255)')
+                .attr('stroke', 'green')
+                .on('click', mouseClick);
+
+            function mouseClick(evt) {
+
+                let xCoordinate = evt.x;
+                let yCoordinate = evt.y;
+
+                const randomColor = getRandomColorValue();
+                clickEventCoordinates.push({ x: xCoordinate, y: yCoordinate, color: randomColor });
+
+                // console.log(clickEventCoordinates);
+
+                setStarPatternValues();
+            }
+
+            function getRandomColorValue() {
+
+                const values = "0123456789ABCDEF";
+                let randomColor = "#";
+                for (let i = 0; i < 6; i++) {
+                    randomColor += values[Math.floor(Math.random() * 16)];
+                }
+                return randomColor;
+
+            }
+
+            function setStarPatternValues() {
+
+                const horizLineLength = 35;
+                const vertLineLength = 35;
+                const diagLineLength = 20;
+
+                clickEventCoordinates.forEach(coord => {
+                    Star(coord.x, coord.y,horizLineLength, vertLineLength, diagLineLength, coord.color);
+                })
+
+            }
+
+            function Star(x, y, horizLen, vertLen, diagLen, color) {
+
+                const star = svg.append("g")
+                    .attr("transform", `translate(${x},${y})`);
+
+                star.append('path')
+                    .attr('d', function() {
+                        let p = d3.path();
+                        p.moveTo(-horizLen / 2,0);
+                        p.lineTo(horizLen / 2,0);
+                        p.moveTo(0,-vertLen / 2);
+                        p.lineTo(0,vertLen / 2);
+                        p.moveTo(-diagLen / 2,-diagLen / 2);
+                        p.lineTo(diagLen / 2,diagLen / 2);
+                        p.moveTo(-diagLen / 2,diagLen / 2);
+                        p.lineTo(diagLen / 2,-diagLen / 2);
+                        p.closePath();
+                        return p;
+                    })
+                    .attr("stroke", color || getRandomColorValue())
+                    .style('stroke-width', 3);
+                                            
+            }
+
+
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,56 @@
+<html>
+<head>
+<title> Demonstrates using paths in d3js </title>
+<script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<!--  Create SVG element -->
+<svg id="svg" width=200 height=200></svg> 
+<p><textarea id = 't_area' rows = '4' cols = '35'> Text Area 
+</textarea>
+
+<script>
+
+// get SVG element, its dimensions
+let svg = d3.select('svg');
+let width = svg.attr('width');
+let height = svg.attr('height');
+
+// create a rectangular region with a background color
+let plot = svg.append('g');
+	plot.append('rect')
+		.attr('x', 0)
+		.attr('y', 0)
+		.attr('width', 195)
+		.attr('height', 195)
+		.attr('fill', 'rgb(230, 230, 230)')
+		.attr('stroke', 'red');
+
+// create a rectangle 
+	plot.append('rect')
+		.attr('x', 50)
+		.attr('y', 50)
+		.attr('width', 75)
+		.attr('height', 40)
+		.attr('fill', 'red')
+		.attr('stroke', 'green')
+		.on('click', rectPress)
+
+// create a circle 
+	plot.append('circle')
+		.attr('cx', 100)
+		.attr('cy', 140)
+		.attr('r', 20)
+		.attr('fill', 'red')
+		.attr('stroke', 'green')
+		.on('click', circPress)
+
+	function rectPress(evt) {
+		document.getElementById('t_area').value = 'Mouse Pressed on Rectangle at ' + evt.x + ',' + evt.y;
+	}
+	function circPress(evt) {
+		document.getElementById('t_area').value = 'Mouse Pressed on Circle at ' + evt.x + ',' + evt.y;
+	}
+</script>
+</body>
+</html>

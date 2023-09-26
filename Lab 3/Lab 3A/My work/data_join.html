@@ -1,0 +1,47 @@
+<html>
+<head>
+<title> Demonstrates using paths in d3js </title>
+<script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<svg id="svg" width=1000 height=1000></svg>
+
+<script>
+// get svg element and its dimensions
+let svg = d3.select('svg');
+let width = svg.attr('width');
+let height = svg.attr('height');
+
+// define 5 circles - this is the data 
+let circles = [ 
+	{xpos: 60, ypos:  60, radius: 50},
+	{xpos: 130, ypos: 130, radius: 35},
+	{xpos: 180, ypos: 180, radius: 20},
+	{xpos: 230, ypos: 230, radius: 35},
+	{xpos: 300, ypos: 300, radius: 50}
+	];
+
+// create a plot rectangle with a background color
+let plot = svg.append('g');
+	plot.append('rect')
+		.attr('x', 0)
+		.attr('y', 0)
+		.attr('width', 450)
+		.attr('height', 450)
+		.attr('fill', 'rgb(255, 220, 235)')
+		.attr('stroke', 'green');
+
+
+// D3 selection  to create the circles
+	plot.selectAll('circles') 
+		.data(circles)			// circle data will iterate
+		.enter()
+		.append('circle') 		// create the circle element
+		.attr('cx', (d) => d.xpos)
+		.attr('cy', (d) => d.ypos)
+		.attr('r', (d) => d.radius)
+		.attr('fill', 'blue')
+		.attr('stroke', 'red')
+</script>
+</body>
+</html>

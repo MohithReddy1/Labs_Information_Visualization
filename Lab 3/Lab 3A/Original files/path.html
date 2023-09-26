@@ -1,0 +1,40 @@
+<html>
+<head>
+<title> Demonstrates using paths in d3js </title>
+<script type = "text/javascript" src = "https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<svg id="svg" width=200 height=200></svg>
+
+<script>
+
+// get SVG element,  its dimensions
+let svg = d3.select('svg');
+let width = svg.attr('width');
+let height = svg.attr('height');
+
+// create a rectangular region with a background
+let plot = svg.append('g');
+	plot.append('rect')
+		.attr('x', 0)
+		.attr('y', 0)
+		.attr('width', 195)
+		.attr('height', 195)
+		.attr('fill', 'rgb(230, 230, 230)')
+		.attr('stroke', 'red');
+
+// creat a path element and use moveTo, lineTo calls to create a closed path
+	plot.append('path')
+		.attr('d', function() {
+				let p = d3.path();
+				p.moveTo(25,25);
+				p.lineTo(75,25);
+				p.lineTo(75,75);
+				p.closePath();
+				return p;
+			})
+		.attr('stroke', 'green')
+		.attr('fill', 'red')
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas</title>
+    <style>
+        #myCanvas{
+            border: 2px solid #88ff89; 
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+    <script type="text/javascript" src="./elev_data.js"></script>
+    <script type="text/javascript" src="./lenna.js"></script>
+
+    <script>
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 1200;
+        canvas.height = 1000;
+
+        // convert RGB to RGBA Pixels values by adding 4th element value 255
+        function convertRGBtoRGBAPixels(rgbpix_vals) {
+            const rgbaPix_vals = [];
+
+            for (let i = 0; i < rgbpix_vals.length; i += 3) {
+
+                const r = rgbpix_vals[i];
+                const g = rgbpix_vals[i + 1];
+                const b = rgbpix_vals[i + 2];
+
+                const rgbaPixel = [r, g, b, 255];
+
+                rgbaPix_vals.push(...rgbaPixel);
+            }
+
+            return rgbaPix_vals;
+        }
+
+
+        // original image display in canvas
+        const lenna_imageData = new ImageData(lenna_data.width, lenna_data.height)
+        lenna_imageData.data.set(convertRGBtoRGBAPixels(lenna_data.pix_vals))
+        ctx.putImageData(lenna_imageData, 0, 0)
+
+        const elve_imagedata = new ImageData(colorado_elev.width, colorado_elev.height)
+        elve_imagedata.data.set(convertRGBtoRGBAPixels(colorado_elev.pix_vals))
+        ctx.putImageData(elve_imagedata, 520,32)
+
+
+        //subsample the orignal image function
+        function subsampleOutput(n,imageObject, dx, dy) {
+
+            const imgData = new ImageData(imageObject.width, imageObject.height)
+            imgData.data.set(convertRGBtoRGBAPixels(imageObject.pix_vals))
+
+            const newW = imgData.width / n;
+            const newH = imgData.height / n;
+
+            const reducedImgData = ctx.createImageData(newW, newH);
+
+            for (let y = 0; y < newH; y++) {
+                for (let x = 0; x < newW; x++) {
+                    const srcX = x * n;
+                    const srcY = y * n;
+
+                    const srcIndex = (srcY * imgData.width + srcX) * 4;
+                    const targetIndex = (y * newW + x) * 4;
+
+                    for (let k = 0; k < 4; k++) {
+                        reducedImgData.data[targetIndex + k] = imgData.data[srcIndex + k];
+                    }
+                }
+            }
+
+            ctx.putImageData(reducedImgData, dx, dy);
+        }
+
+
+        // subsample the image 3 times (factors or 2, 4, 8) 
+        subsampleOutput(2,lenna_data, 0, 516);
+        subsampleOutput(4,lenna_data, 0, 775);
+        subsampleOutput(8,lenna_data, 0, 907);
+
+        subsampleOutput(2,colorado_elev, 520, 517);
+        subsampleOutput(4,colorado_elev, 520, 763);
+        subsampleOutput(8,colorado_elev, 520, 888);
+        
+
+    </script>
+</body>
+</html>
