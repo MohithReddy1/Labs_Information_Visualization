@@ -32,7 +32,7 @@
 
         d3.csv("./sales_data_sample.csv").then(function(data) {
                        
-            const salesDataSample = new Map();
+            const salesDataSample = new Map();  
             data.forEach(function(d) {
                 const key = d.MONTH_ID + '/' + d.YEAR_ID;
                 if (!salesDataSample.has(key)) {

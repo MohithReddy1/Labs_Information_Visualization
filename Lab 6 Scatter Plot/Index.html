@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .mainTitle{
+          display: flex;
+          justify-content: center;
+      }
+      .container{
+        display: flex;
+        align-items: center;
+      }
+      #hover{
+        position: absolute;
+        opacity: 0;
+        background-color: rgb(255, 255, 255);
+        padding: 5px;
+        border: 2px solid #ccc;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mainTitle">
+      <h2>Sepal Length vs Sepal Width Scatterplot</h2>
+    </div>
+    <div class="container">
+      <svg id="plot" width=550 height=550></svg>
+      <div style="padding-left: 50px;">
+        <textarea id="text" rows="5" cols="35" readonly></textarea>
+      </div>
+    </div>
+    
+    <div id="hover"></div>
+
+    <script>
+
+      d3.json("iris.json").then(function(data) {
+        
+        const irisData = new Map();
+
+        data.forEach(function(d, index) {
+          irisData.set(index, d);
+        });
+        // console.log(irisData);
+
+        const dataSet = Array.from(irisData.values()).map(d => ({
+          sepalLength: d.sepalLength,
+          sepalWidth: d.sepalWidth,
+        }));
+        // console.log(dataSet);
+        scatterPlot(dataSet);
+
+      });
+
+      function scatterPlot(data){
+
+        // console.log(data);
+        const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+        
+        const svg = d3.select("#plot");
+        
+        const width = + svg.attr("width") - margin.left - margin.right;
+        const height = + svg.attr("height") - margin.top - margin.bottom;
+
+        // Scaling
+        const xScale = d3.scaleLinear()
+                    .range([0, width])
+                    .domain([d3.min(data, function(d) { return d["sepalLength"]; }), d3.max(data, function(d) { return d["sepalLength"]; })]);
+        
+        const yScale = d3.scaleLinear()
+                    .range([height, 0])
+                    .domain([d3.min(data, function(d) { return d["sepalWidth"]; }), d3.max(data, function(d) { return d["sepalWidth"]; })]);
+
+        const g = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Add X-axis
+        g.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(yScale));
+
+        // Add Y-axis
+        g.append("g")
+          .call(d3.axisLeft(yScale));
+
+        // Axis Labels
+        g.append("text")
+          .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top +22) + ")")
+          .text("Sepal Length");
+
+        g.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1.1em")
+          .text("Sepal Width");
+
+        const hoverInfo = d3.select("#hover");
+
+        // Scatterplot
+        g.selectAll("circle")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d) { return xScale(d["sepalLength"]); })
+          .attr("cy", function(d) { return yScale(d["sepalWidth"]); })
+          .attr('fill', 'green')
+          .attr("r", 5)
+          .style('cursor', 'pointer')
+          .each(function(d, i) {
+            // Set the data-index attribute to store the index
+            d3.select(this).attr("data-index", i);
+          })
+          .on("click", function(e, d) {
+            const dataIndex = d3.select(this).attr("data-index");
+            document.getElementById("text").value = '\r\n'  +`Datapoint Index: ${dataIndex}` + '\r\n'  + `Sepal Length: ${d["sepalLength"]}` + '\r\n'  + `Sepal Width: ${d["sepalWidth"]}\n`;
+          })
+          .on("mouseover", function(e, d) {
+              hoverInfo.transition()
+                  .duration(150)
+                  .style("opacity", 0.9);
+              hoverInfo.html(`Sepal Length: ${d["sepalLength"]},` + '\r\n'  + `Sepal Width: ${d["sepalWidth"]}`) //rounded off to two decimals 
+                  .style("left", (e.x + 10) + "px")
+                  .style("top", (e.y - 25) + "px")
+                  .style("font-weight", "500")
+                  .style("font-size", "18px");
+          })
+          .on("mouseout", function() {
+              hoverInfo.transition()
+                  .duration(600)
+                  .style("opacity", 0);
+          });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radviz Projections</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .mainTitle{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        svg{
+            margin-left: 70px;
+            margin-right: 50px;
+        }
+        #chartContainer, #title{
+            display: flex;
+        }
+        #title{
+            font-size: 25px;
+            /* font-weight: bold; */
+            margin-left: 10%;
+        }
+    </style>
+</head>
+<body>
+    <div class="mainTitle">
+        <h1>5 different visualizations of Cars data using Radviz Projection</h1>
+    </div>
+    <div id="title">
+        <p>Vehicle <strong>speed</strong> as predictor</p>
+        <p style="margin-left: 25%;">Vehicle <strong>weight</strong> as predictor</p>
+    </div>
+    <div id="chartContainer">
+        <div id="chart1"></div>
+        <div id="chart2"></div>
+        
+    </div>
+    <div style="margin-top: 50px;" id="title">
+        <p>Vehicle <strong>economy</strong> as predictor</p>
+        <p style="margin-left: 25%;">Vehicle <strong>power</strong> as predictor</p>
+    </div>
+    <div style="margin-bottom: 50px;"  id="chartContainer">
+        <div id="chart3"></div>
+        <div id="chart4"></div>
+    </div>
+    <div id="title">
+        <p>Vehicle <strong>weight</strong> as predictor for Cars93 data</p>
+    </div>
+    <div id="chart5"></div>
+
+    <script>
+        // Read data from cars.csv
+        d3.csv("cars.csv").then(function(data) {
+            // Define the predictor and dimensions
+            const predictor1 = "speed_sec";
+            const predictor2 = "weight_lb";
+            const predictor3 = "economy_mpg";
+            const predictor4 = "power_hp";
+
+            const dimensions = ["economy_mpg", "speed_sec", "power_hp", "displacement_cc", "cylinders", "weight_lb"];
+            // const dimensions = ["type", "price", "mpg_city", "passengers", "weight"]
+            
+            // Normalize data
+            const normalizedData1 = normalizeData(data, dimensions, predictor1);
+            const normalizedData2 = normalizeData(data, dimensions, predictor2);
+            const normalizedData3 = normalizeData(data, dimensions, predictor3);
+            const normalizedData4 = normalizeData(data, dimensions, predictor4);
+
+            // Calculate vectors for each dimension
+            const vectors = calVectors(dimensions);
+
+            // Create Radviz plot
+            createRadvizPlot(normalizedData1, vectors, dimensions, predictor1, 'chart1');
+            createRadvizPlot(normalizedData2, vectors, dimensions, predictor2, 'chart2');
+            createRadvizPlot(normalizedData3, vectors, dimensions, predictor3, 'chart3');
+            createRadvizPlot(normalizedData4, vectors, dimensions, predictor4, 'chart4');
+        });
+
+        d3.csv("cars93.csv").then(function(data) {
+            // Define the predictor and dimensions
+            const predictor = "weight";
+            const dimensions = ["price", "mpg_city", "passengers", "weight"]
+            
+            // Normalize data
+            const normalizedData = normalizeData(data, dimensions, predictor);
+            
+            // Calculate vectors for each dimension
+            const vectors = calVectors(dimensions);
+
+            // Create Radviz plot
+            createRadvizPlot(normalizedData, vectors, dimensions, predictor, 'chart5');
+        });
+
+        // calculate vectors
+        function calVectors(dimensions) {
+            const vectors = [];
+            const angle = (2 * Math.PI) / dimensions.length;
+            for (let i = 0; i < dimensions.length; i++) {
+                vectors.push({
+                    x: Math.cos(i * angle),
+                    y: Math.sin(i * angle)
+                });
+            }
+            return vectors;
+        }
+        
+        // Normalize data within the range [0, 1]
+        function normalizeData(data, dimensions, predictor) {
+            const normalizedData = [];
+            for (const d of data) {
+                const point = {};
+                for (const dimension of dimensions) {
+                    const value = parseFloat(d[dimension]);
+                    const min = d3.min(data, d => parseFloat(d[dimension]));
+                    const max = d3.max(data, d => parseFloat(d[dimension]));
+                    point[dimension] = (value - min) / (max - min);
+                }
+                // Normalize the predictor separately
+                const predictorValue = parseFloat(d[predictor]);
+                const predictorMin = d3.min(data, d => parseFloat(d[predictor]));
+                const predictorMax = d3.max(data, d => parseFloat(d[predictor]));
+                point[predictor] = (predictorValue - predictorMin) / (predictorMax - predictorMin);
+                normalizedData.push(point);
+            }
+            return normalizedData;
+        }
+
+        // Create Radviz plot
+        function createRadvizPlot(data, vectors, dimensionsArray, predictor, chartId) {
+            const width = 500;
+            const height = 500;
+
+            const dimensions = dimensionsArray.filter(d => d !== predictor);
+            // console.log(dimensions);
+
+            const svg = d3.select(`#${chartId}`)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('padding-top', '20px');
+
+            // Create a circle at the origin
+            svg.append("circle")
+                .attr("cx", width / 2)
+                .attr("cy", height / 2)
+                .attr("r", width / 2)
+                .attr("fill", "none")
+                .attr("stroke", "gray");
+
+            // Plot data points (dimensions) as blue circles on the outer circle and add titles
+            const outerCircleR = width / 2;
+            const pointRadius = 5;
+
+            svg.selectAll(".dimension")
+                .data(dimensions)
+                .enter().append("g")
+                .attr("class", "dimension")
+                .append("circle")
+                .attr("cx", (d, i) => width / 2 + outerCircleR * Math.cos((2 * Math.PI * i) / dimensions.length))
+                .attr("cy", (d, i) => height / 2 + outerCircleR * Math.sin((2 * Math.PI * i) / dimensions.length))
+                .attr("r", pointRadius)
+                .attr("fill", "blue");
+
+            svg.selectAll(".dimension")
+                .append("text")
+                .attr("x", (d, i) => width / 2 + (outerCircleR - 50) * Math.cos((2 * Math.PI * i) / dimensions.length))
+                .attr("y", (d, i) => height / 2 + (outerCircleR - 20) * Math.sin((2 * Math.PI * i) / dimensions.length))
+                .text(d => d)
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "middle")
+                .style('font-size','20px');
+
+            // Filter out data points that are outside the circle
+            const filteredData = data.filter(d => {
+                for (let i = 0; i < dimensions.length; i++) {
+                    const dimensionValue = d[dimensions[i]];
+                    if (isNaN(dimensionValue)) {
+                        // console.log("Invalid data for point: ", d);
+                        return false;
+                    }
+                }
+
+                let x = 0;
+                let y = 0;
+                for (let i = 0; i < dimensions.length; i++) {
+                    x += vectors[i].x * outerCircleR * d[dimensions[i]];
+                    y += vectors[i].y * outerCircleR * d[dimensions[i]];
+                }
+                
+                // Check if the point is within the circle's bounds
+                return Math.sqrt(x * x + y * y) <= outerCircleR;
+            });
+
+            // Plot data points on the Radviz plot
+            svg.selectAll(".point")
+                .data(filteredData)
+                .enter()
+                .append("circle")
+                .attr("class", "point")
+                .attr("cx", d => {
+                    let x = 0;
+                    for (let i = 0; i < dimensions.length; i++) {
+                        x += vectors[i].x * outerCircleR * d[dimensions[i]];
+                    }
+                    return width / 2 + x;
+                })
+                .attr("cy", d => {
+                    let y = 0;
+                    for (let i = 0; i < dimensions.length; i++) {
+                        y += vectors[i].y * outerCircleR * d[dimensions[i]];
+                    }
+                    return height / 2 + y;
+                })
+                .attr("r", 3)
+                .attr("fill", d => getColorBasedOnPredictor(d[predictor]));
+
+        
+        }
+
+        // Function to determine the color based on the predictor value
+        function getColorBasedOnPredictor(predictorValue) {
+            return d3.interpolateSpectral(predictorValue);
+        }
+    </script>
+</body>
+</html>
